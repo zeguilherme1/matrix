@@ -1,5 +1,6 @@
 #include "metadata.hpp"
 #include "parser.hpp"
+#include <cstdint>
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
@@ -9,19 +10,17 @@
 #include <string>
 
 int main(int argc, char *argv[]) {
-
     std::ifstream file(argv[1], std::ios::binary);
 
-    std::string data((std::istreambuf_iterator<char>(file)),
-                     std::istreambuf_iterator<char>());
+    std::string data((std::istreambuf_iterator<char>(file)), {});
 
     Parser parser(data);
 
     Bencode torrent = parser.parse();
 
-    std::string test = parser.formatBencode(torrent);
+    Metadata meta = Metadata::from_bencode(torrent);
 
-    std::cout << test << std::endl;
-
+    std::cout << meta.announce << std::endl;
+    
     return 0;
 }

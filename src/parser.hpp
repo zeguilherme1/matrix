@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
 #include <iostream>
 #include <map>
@@ -23,7 +24,7 @@ struct Bencode {
     enum class Type { Integer, String, List, Dict };
 
     Type type;
-    int integer;
+    int64_t integer;
     std::string string;
     std::vector<Bencode> list;
     std::map<std::string, Bencode> dict;
@@ -143,22 +144,37 @@ class Parser {
 
         switch (value.type) {
         case Bencode::Type::Integer:
-            formatted_bencode += (indent + std::to_string(value.integer) + "\n");
+            formatted_bencode +=
+                (indent + std::to_string(value.integer) + "\n");
             break;
         case Bencode::Type::String:
             formatted_bencode += indent + "\"" + value.string + "\"\n";
             break;
-        case Bencode::Type::Dict:
-            formatted_bencode += (indent + "{\n");
+        case Bencode::Type::Dict: {
+            formatted_bencode += indent + "{\n";
+
+            bool first = true;
+
             for (const auto &[key, val] : value.dict) {
-                formatted_bencode += (indent + " " + key + ":\n");
-                formatted_bencode += formatBencode(val, depth + 2);
+                if (!first)
+                    formatted_bencode += ",\n";
+
+                first = false;
+
+                formatted_bencode += indent + "  \"" + key + "\": ";
+                formatted_bencode += formatBencode(val, depth + 1);
             }
-            formatted_bencode += (indent + "}\n");
+
+            formatted_bencode += "\n" + indent + "}";
             break;
+        }
         case Bencode::Type::List:
             formatted_bencode += (indent + "[\n");
+            bool first = true;
             for (const auto &item : value.list) {
+                if (!first)
+                    formatted_bencode += ",\n";
+                first = false;
                 formatted_bencode += formatBencode(item, depth + 1);
             }
             formatted_bencode += (indent + "]\n");

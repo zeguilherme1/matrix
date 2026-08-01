@@ -1,5 +1,8 @@
 #pragma once
+#include "parser.hpp"
 #include <algorithm>
+#include <array>
+#include <cstdint>
 #include <cstdio>
 #include <iostream>
 #include <map>
@@ -11,9 +14,11 @@ struct Metadata {
     std::string announce;
     std::string comment;
 
-    u_int64_t length;
+    uint64_t length;
     std::string name;
 
-    u_int32_t piece_length;
-    std::vector<std::array<u_int8_t, 20>> piece_hashes;
+    uint32_t piece_length;
+    std::vector<std::array<uint8_t, 20>> piece_hashes;
+
+    static Metadata from_bencode(const Bencode &root);
 };
