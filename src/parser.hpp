@@ -137,6 +137,37 @@ class Parser {
         return {.type = Bencode::Type::Dict, .dict = dict};
     }
 
+    std::string formatBencode(const Bencode &value, int depth = 0) {
+        std::string indent(depth * 2, ' ');
+        std::string formatted_bencode;
+
+        switch (value.type) {
+        case Bencode::Type::Integer:
+            formatted_bencode += (indent + std::to_string(value.integer) + "\n");
+            break;
+        case Bencode::Type::String:
+            formatted_bencode += indent + "\"" + value.string + "\"\n";
+            break;
+        case Bencode::Type::Dict:
+            formatted_bencode += (indent + "{\n");
+            for (const auto &[key, val] : value.dict) {
+                formatted_bencode += (indent + " " + key + ":\n");
+                formatted_bencode += formatBencode(val, depth + 2);
+            }
+            formatted_bencode += (indent + "}\n");
+            break;
+        case Bencode::Type::List:
+            formatted_bencode += (indent + "[\n");
+            for (const auto &item : value.list) {
+                formatted_bencode += formatBencode(item, depth + 1);
+            }
+            formatted_bencode += (indent + "]\n");
+            break;
+        }
+
+        return formatted_bencode;
+    }
+
   private:
     const std::string &m_str;
     size_t m_pos = 0;
@@ -144,4 +175,3 @@ class Parser {
     char peek() { return m_str.at(m_pos); }
     char consume() { return m_str.at(m_pos++); }
 };
-

@@ -1,3 +1,4 @@
+#include "metadata.hpp"
 #include "parser.hpp"
 #include <algorithm>
 #include <cctype>
@@ -7,9 +8,9 @@
 #include <sstream>
 #include <string>
 
-int main() {
+int main(int argc, char *argv[]) {
 
-    std::ifstream file("debian.torrent", std::ios::binary);
+    std::ifstream file(argv[1], std::ios::binary);
 
     std::string data((std::istreambuf_iterator<char>(file)),
                      std::istreambuf_iterator<char>());
@@ -18,8 +19,9 @@ int main() {
 
     Bencode torrent = parser.parse();
 
-    // todo: implement a function to print the decoded bencode
-    // printBencode(torrent);
+    std::string test = parser.formatBencode(torrent);
+
+    std::cout << test << std::endl;
 
     return 0;
 }
