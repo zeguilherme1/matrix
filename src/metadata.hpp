@@ -19,6 +19,9 @@ struct Metadata {
 
     uint32_t piece_length;
     std::vector<std::array<uint8_t, 20>> piece_hashes;
+    std::string info_hash;
 
     static Metadata from_bencode(const Bencode &root);
 };
+
+void printMetadata(const Metadata &meta);

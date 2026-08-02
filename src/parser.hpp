@@ -1,9 +1,11 @@
 #pragma once
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
 #include <map>
+#include <openssl/sha.h>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -127,11 +129,20 @@ class Parser {
         std::map<std::string, Bencode> dict;
 
         while (peek() != 'e') {
-            Bencode bencode_key = parseString();
-            Bencode value = parse();
+            Bencode key = parseString();
 
-            std::string key = bencode_key.string;
-            dict.insert({key, value});
+            if (key.string == "info") {
+                m_info_start = m_pos;
+
+                Bencode value = parse();
+
+                m_info_end = m_pos;
+
+                dict.insert({key.string, value});
+            } else {
+                Bencode value = parse();
+                dict.insert({key.string, value});
+            }
         }
         consume();
 
@@ -184,10 +195,26 @@ class Parser {
         return formatted_bencode;
     }
 
+    std::string getRawInfo() {
+        return (m_str.substr(m_info_start, m_info_end - m_info_start));
+    }
+
+    std::array<uint8_t, 20> getInfoHash() {
+        std::string raw_info = getRawInfo();
+        std::array<uint8_t, 20> info_hash{};
+
+        SHA1(reinterpret_cast<const unsigned char *>(raw_info.data()),
+             raw_info.size(), info_hash.data());
+
+        return info_hash;
+    }
+
   private:
     const std::string &m_str;
     size_t m_pos = 0;
+    size_t m_info_start;
+    size_t m_info_end;
 
-    char peek() { return m_str.at(m_pos); }
-    char consume() { return m_str.at(m_pos++); }
+    uint8_t peek() { return static_cast<uint8_t>(m_str.at(m_pos)); }
+    uint8_t consume() { return static_cast<uint8_t>(m_str.at(m_pos++)); }
 };

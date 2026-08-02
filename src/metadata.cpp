@@ -29,3 +29,12 @@ Metadata Metadata::from_bencode(const Bencode &root) {
     }
     return meta;
 }
+
+void printMetadata(const Metadata &meta) {
+    std::cout << "Announce: " << meta.announce << std::endl;
+    std::cout << "Name: " << meta.name << std::endl;
+    std::cout << "Length: " << meta.length << std::endl;
+    std::cout << "Piece length: " << meta.piece_length << std::endl;
+
+    return;
+}
